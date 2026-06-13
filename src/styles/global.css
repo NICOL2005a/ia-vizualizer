@@ -1,0 +1,66 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+.container{
+  display:flex;
+  height:100vh;
+}
+
+.content{
+  flex:1;
+  background:#f5f7fb;
+}
+
+.dashboard{
+  padding:30px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.card{
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+.board{
+  display:grid;
+  grid-template-columns:repeat(4,80px);
+  gap:5px;
+  padding:20px;
+}
+
+.cell{
+  width:80px;
+  height:80px;
+  background:white;
+  border:1px solid #ddd;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.bottom-panels{
+  display:flex;
+  gap:20px;
+  padding:20px;
+}
+
+.panel{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  min-width:250px;
+}
+
+.titulo-comparacion {
+  text-align: center;
+  margin: 20px 0;
+  font-weight: bold;
+}
