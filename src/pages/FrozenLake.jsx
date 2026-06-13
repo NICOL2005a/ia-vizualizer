@@ -122,12 +122,11 @@ export default function FrozenLake() {
       }
 
       const response = await fetch(
-  "https://backend-production-c5264.up.railway.app",
+  "https://backend-production-c5264.up.railway.app/bfs",
   {
     method: "POST",
     headers: {
-      "Content-Type":
-        "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       board,
@@ -135,48 +134,35 @@ export default function FrozenLake() {
   }
 );
 
-const result =
-  await response.json();
+const result = await response.json();
 
-      result.visitedOrder.forEach(
-        (
-          node,
-          index
-        ) => {
-          setTimeout(() => {
-            setVisitedCells(
-              (prev) => [
-                ...prev,
-                node,
-              ]
-            );
+const visitedOrder = result.visitedOrder || result.visited_order || [];
+const path = result.path || [];
 
-            setHistory(
-              (prev) => [
-                ...prev,
-                `Visitado (${node[0]}, ${node[1]})`,
-              ]
-            );
+visitedOrder.forEach((node, index) => {
+  setTimeout(() => {
+    setVisitedCells((prev) => [...prev, node]);
 
-            setVisitedNodes(
-              index + 1
-            );
+    setHistory((prev) => [
+      ...prev,
+      `Visitado (${node[0]}, ${node[1]})`,
+    ]);
 
-            setExpandedNodes(
-              index
-            );
-          }, index * 300);
-        }
-      );
+    setVisitedNodes(index + 1);
+    setExpandedNodes(index);
+  }, index * 300);
+});
 
-      const delay =
-        result.visitedOrder.length *
-        300;
+const delay = visitedOrder.length * 300;
 
-      setTimeout(() => {
-        setSolutionPath(
-          result.path
-        );
+setTimeout(() => {
+  setSolutionPath(path);
+
+  setHistory((prev) => [
+    ...prev,
+    path.length > 0 ? "Camino encontrado" : "No se encontró camino",
+  ]);
+}, delay);
 
         setHistory(
           (prev) => [
