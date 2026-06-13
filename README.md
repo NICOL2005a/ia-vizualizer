@@ -1,16 +1,140 @@
-# React + Vite
+# IA Visualizer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Proyecto desarrollado para la materia de **Fundamentos de Inteligencia Artificial**.
 
-Currently, two official plugins are available:
+## Descripción
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+IA Visualizer es una aplicación web interactiva que permite visualizar y experimentar con diferentes algoritmos clásicos de Inteligencia Artificial mediante simulaciones gráficas.
 
-## React Compiler
+El sistema integra múltiples problemas y técnicas estudiadas en clase dentro de una sola interfaz accesible desde cualquier navegador.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Características
 
-## Expanding the ESLint configuration
+* Interfaz web desarrollada con React y Vite.
+* Backend desarrollado con FastAPI.
+* Despliegue en la nube mediante Railway.
+* Visualización paso a paso de algoritmos.
+* Arquitectura Frontend + Backend desacoplada.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Módulos Implementados
+
+### Frozen Lake
+
+Implementación del algoritmo de búsqueda **Breadth-First Search (BFS)** para encontrar caminos en un entorno tipo Frozen Lake.
+
+Funciones:
+
+* Configuración del mapa.
+* Visualización de nodos visitados.
+* Visualización del camino solución.
+* Estadísticas de ejecución.
+
+### Sokoban
+
+Implementación del algoritmo **A*** para resolver niveles del juego Sokoban.
+
+Funciones:
+
+* Editor de niveles.
+* Resolución automática mediante IA.
+* Visualización del proceso de búsqueda.
+* Estadísticas e historial.
+
+### Tic-Tac-Toe
+
+Juego de Gato contra una IA basada en el algoritmo **Minimax**.
+
+Funciones:
+
+* Juego jugador vs IA.
+* Decisiones óptimas de la computadora.
+* Detección de victoria, derrota y empate.
+
+### Problema de las 8 Reinas
+
+Visualización de una solución para el clásico problema de las 8 Reinas.
+
+Funciones:
+
+* Generación automática de solución.
+* Representación gráfica del tablero.
+* Validación de posiciones seguras.
+
+## Tecnologías Utilizadas
+
+### Frontend
+
+* React
+* Vite
+* JavaScript
+* CSS
+
+### Backend
+
+* Python
+* FastAPI
+* Uvicorn
+
+### Despliegue
+
+* GitHub
+* Railway
+
+## Estructura del Proyecto
+
+```text
+ia-vizualizer/
+│
+├── backend/
+│   ├── algorithms/
+│   ├── main.py
+│   ├── tictactoe_routes.py
+│   └── 8_reinas_FIA.py
+│
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── styles/
+│
+├── public/
+├── package.json
+└── README.md
+```
+
+## Instalación Local
+
+### Frontend
+
+```bash
+npm install
+npm run dev
+```
+
+### Backend
+
+```bash
+cd backend
+
+pip install -r requirements.txt
+
+uvicorn main:app --reload
+```
+
+## Enlace del Proyecto
+
+Sistema desplegado:
+
+https://ia-vizualizer-production.up.railway.app
+
+## Repositorio
+
+https://github.com/NICOL2005a/ia-vizualizer
+
+## Autores
+
+Cano Nuño Marco Vinicio
+López Reyes Claudia Nicol
+Rodriguez Velazquez Victor Martin
+
+Proyecto desarrollado como práctica académica para la materia de Fundamentos de Inteligencia Artificial.
+
