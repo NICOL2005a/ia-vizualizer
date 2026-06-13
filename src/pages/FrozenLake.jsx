@@ -80,13 +80,25 @@ export default function FrozenLake() {
 
       const result = await response.json();
 
-      const result = await response.json();
+      console.log("STATUS:", response.status);
+      console.log("RESULTADO BFS:", result);
 
-console.log("STATUS:", response.status);
-console.log("RESULTADO BFS:", result);
+      const visitedOrder = result.visitedOrder || result.visited_order || [];
+      const path = result.path || [];
 
-const visitedOrder = result.visitedOrder || result.visited_order || [];
-const path = result.path || [];
+      visitedOrder.forEach((node, index) => {
+        setTimeout(() => {
+          setVisitedCells((prev) => [...prev, node]);
+
+          setHistory((prev) => [
+            ...prev,
+            `Visitado (${node[0]}, ${node[1]})`,
+          ]);
+
+          setVisitedNodes(index + 1);
+          setExpandedNodes(index);
+        }, index * 300);
+      });
 
       const delay = visitedOrder.length * 300;
 
