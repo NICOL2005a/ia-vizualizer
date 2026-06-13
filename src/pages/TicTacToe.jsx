@@ -52,7 +52,7 @@ export default function TicTacToe() {
 
     try {
       const response = await fetch(
-        "https://backend-production-c5264.up.railway.app",
+        "https://backend-production-c5264.up.railway.app/api/tictactoe/jugar",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
