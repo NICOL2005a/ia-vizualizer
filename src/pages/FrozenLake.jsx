@@ -128,9 +128,7 @@ export default function FrozenLake() {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      board,
-    }),
+    body: JSON.stringify({ board }),
   }
 );
 
