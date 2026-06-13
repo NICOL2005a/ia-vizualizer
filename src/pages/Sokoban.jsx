@@ -171,7 +171,7 @@ export default function Sokoban() {
       setSolution([]);
       setCurrentStep(0);
 
-      const response = await fetch("http://127.0.0.1:8000/sokoban", {
+      const response = await fetch("https://backend-production-c5264.up.railway.app", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

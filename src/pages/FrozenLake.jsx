@@ -122,7 +122,7 @@ export default function FrozenLake() {
       }
 
       const response = await fetch(
-  "http://127.0.0.1:8000/bfs",
+  "https://backend-production-c5264.up.railway.app",
   {
     method: "POST",
     headers: {
