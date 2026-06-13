@@ -171,13 +171,18 @@ export default function Sokoban() {
       setSolution([]);
       setCurrentStep(0);
 
-      const response = await fetch("https://backend-production-c5264.up.railway.app", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ board }),
-      });
+      const response = await fetch(
+  "https://backend-production-c5264.up.railway.app/sokoban",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      board,
+    }),
+  }
+);
 
       const data = await response.json();
 
