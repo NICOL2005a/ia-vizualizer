@@ -6,6 +6,17 @@ import FrozenLakeStats from "../components/FrozenLakeStats";
 import FrozenLakeHistory from "../components/FrozenLakeHistory";
 
 const CELL_TYPES = ["F", "H", "S", "G"];
+const API_BASE_URL = "https://backend-production-c5264.up.railway.app";
+const ALGORITHMS = {
+  BFS: {
+    label: "BFS",
+    endpoint: "/bfs",
+  },
+  DFS: {
+    label: "DFS",
+    endpoint: "/dfs",
+  },
+};
 
 const createBoard = (size) => {
   return Array(size)
@@ -14,8 +25,7 @@ const createBoard = (size) => {
 };
 
 export default function FrozenLake() {
-  const algorithm = "BFS";
-
+  const [algorithm, setAlgorithm] = useState("BFS");
   const [size, setSize] = useState(4);
   const [board, setBoard] = useState(createBoard(4));
   const [visitedCells, setVisitedCells] = useState([]);
@@ -50,7 +60,7 @@ export default function FrozenLake() {
     setExpandedNodes(0);
   };
 
-  const runBFS = async () => {
+  const runSearch = async () => {
     try {
       resetSimulation();
 
@@ -68,7 +78,7 @@ export default function FrozenLake() {
       }
 
       const response = await fetch(
-        "https://backend-production-c5264.up.railway.app/bfs",
+        `${API_BASE_URL}${ALGORITHMS[algorithm].endpoint}`,
         {
           method: "POST",
           headers: {
@@ -81,7 +91,7 @@ export default function FrozenLake() {
       const result = await response.json();
 
       console.log("STATUS:", response.status);
-      console.log("RESULTADO BFS:", result);
+      console.log(`RESULTADO ${algorithm}:`, result);
 
       const visitedOrder = result.visitedOrder || result.visited_order || [];
       const path = result.path || [];
@@ -149,17 +159,24 @@ export default function FrozenLake() {
 
             <p>Algoritmo</p>
 
-            <div
+            <select
+              value={algorithm}
+              onChange={(e) => {
+                setAlgorithm(e.target.value);
+                resetSimulation();
+              }}
               style={{
                 width: "100%",
                 padding: "10px",
-                background: "#f3f4f6",
-                borderRadius: "8px",
                 marginTop: "5px",
               }}
             >
-              BFS
-            </div>
+              {Object.entries(ALGORITHMS).map(([key, data]) => (
+                <option key={key} value={key}>
+                  {data.label}
+                </option>
+              ))}
+            </select>
 
             <p style={{ marginTop: "20px" }}>Tamaño del mapa</p>
 
@@ -176,7 +193,7 @@ export default function FrozenLake() {
               <option value="8">8x8</option>
             </select>
 
-            <button style={buttonStyle} onClick={runBFS}>
+            <button style={buttonStyle} onClick={runSearch}>
               Ejecutar
             </button>
 

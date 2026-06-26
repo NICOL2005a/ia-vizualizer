@@ -1,30 +1,14 @@
-import React from "react";
-
-const cellStyles = {
-  width: "60px",
-  height: "60px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: "1px solid #ccc",
-  fontSize: "30px",
-  fontWeight: "bold",
-};
-
 const getCellContent = (cell) => {
   switch (cell) {
     case "W":
-      return "🧱"; 
-
+    case "#":
+      return "#";
     case "P":
-      return "😀"; 
-
+      return "P";
     case "B":
-      return "📦";
-
+      return "B";
     case "T":
-      return "🎯"; 
-
+      return "T";
     default:
       return "";
   }
@@ -33,20 +17,16 @@ const getCellContent = (cell) => {
 const getCellBackground = (cell) => {
   switch (cell) {
     case "W":
+    case "#":
       return "#6b7280";
-
     case "T":
       return "#fde68a";
-
     default:
       return "#f8fafc";
   }
 };
 
-export default function SokobanBoard({
-  board,
-  onCellClick,
-}) {
+export default function SokobanBoard({ board, onCellClick }) {
   return (
     <div
       style={{
@@ -57,14 +37,10 @@ export default function SokobanBoard({
     >
       {board.map((row, rowIndex) =>
         row.map((cell, colIndex) => (
-          <div
+          <button
+            type="button"
             key={`${rowIndex}-${colIndex}`}
-            onClick={() =>
-              onCellClick(
-                rowIndex,
-                colIndex
-              )
-            }
+            onClick={() => onCellClick(rowIndex, colIndex)}
             style={{
               width: "60px",
               height: "60px",
@@ -73,13 +49,14 @@ export default function SokobanBoard({
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
-              fontSize: "28px",
-              background: "white",
+              fontSize: "20px",
+              fontWeight: 700,
+              background: getCellBackground(cell),
             }}
           >
-            {getEmoji(cell)}
-          </div>
-        ))
+            {getCellContent(cell)}
+          </button>
+        )),
       )}
     </div>
   );

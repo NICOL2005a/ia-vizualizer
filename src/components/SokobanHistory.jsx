@@ -1,7 +1,3 @@
-// src/components/SokobanHistory.jsx
-
-import React from "react";
-
 function SokobanHistory({ history }) {
   return (
     <div
@@ -17,13 +13,11 @@ function SokobanHistory({ history }) {
       <h3>Historial de movimientos</h3>
 
       {history.length === 0 ? (
-        <p>No hay movimientos aún.</p>
+        <p>No hay movimientos aun.</p>
       ) : (
         <ol>
           {history.map((move, index) => (
-            <li key={index}>
-              {move}
-            </li>
+            <li key={index}>{move}</li>
           ))}
         </ol>
       )}

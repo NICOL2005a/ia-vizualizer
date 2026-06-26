@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Layout from "../components/Layout";
 
 const TOOLS = {
@@ -9,10 +9,28 @@ const TOOLS = {
   TARGET: "T",
 };
 
+const API_BASE_URL = "https://backend-production-c5264.up.railway.app";
+const ALGORITHMS = {
+  astar: "A*",
+  gbfs: "GBFS (Greedy)",
+};
+const GAME_MODES = {
+  manual: "Jugar manualmente",
+  astar: "Resolver con A*",
+  gbfs: "Resolver con GBFS",
+};
+
+const DIRECTIONS = {
+  UP: [-1, 0],
+  DOWN: [1, 0],
+  LEFT: [0, -1],
+  RIGHT: [0, 1],
+};
+
 const createBoard = (size) =>
   Array(size)
     .fill()
-    .map(() => Array(size).fill("."));
+    .map(() => Array(size).fill(TOOLS.FLOOR));
 
 export default function Sokoban() {
   const [size, setSize] = useState(6);
@@ -25,25 +43,35 @@ export default function Sokoban() {
   const [solution, setSolution] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [history, setHistory] = useState([]);
+  const [initialBoard, setInitialBoard] = useState(createBoard(6));
+  const [initialTargets, setInitialTargets] = useState([]);
 
-  const changeSize = (newSize) => {
-    const numericSize = Number(newSize);
-    setSize(numericSize);
-    setBoard(createBoard(numericSize));
-    setTargets([]);
-    setMoves(0);
+  const resetRunState = () => {
     setWin(false);
     setSolution([]);
     setCurrentStep(0);
     setHistory([]);
   };
 
+  const changeSize = (newSize) => {
+    const numericSize = Number(newSize);
+    setSize(numericSize);
+    const emptyBoard = createBoard(numericSize);
+    setBoard(emptyBoard);
+    setInitialBoard(emptyBoard);
+    setTargets([]);
+    setInitialTargets([]);
+    setMoves(0);
+    resetRunState();
+  };
+
   const editCell = (row, col) => {
-    const newBoard = board.map((r) => [...r]);
+    const newBoard = board.map((currentRow) => [...currentRow]);
+    let nextTargets;
 
     if (tool === TOOLS.PLAYER) {
-      for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
+      for (let r = 0; r < size; r += 1) {
+        for (let c = 0; c < size; c += 1) {
           if (newBoard[r][c] === TOOLS.PLAYER) {
             newBoard[r][c] = TOOLS.FLOOR;
           }
@@ -52,137 +80,151 @@ export default function Sokoban() {
     }
 
     if (tool === TOOLS.TARGET) {
-      const exists = targets.some(([r, c]) => r === row && c === col);
-      if (!exists) setTargets((prev) => [...prev, [row, col]]);
+      const exists = targets.some(([targetR, targetC]) => targetR === row && targetC === col);
+      nextTargets = exists ? targets : [...targets, [row, col]];
+      newBoard[row][col] = TOOLS.FLOOR;
+    } else {
+      nextTargets = targets.filter(([targetR, targetC]) => targetR !== row || targetC !== col);
+      newBoard[row][col] = tool;
     }
 
-    newBoard[row][col] = tool;
     setBoard(newBoard);
-    setWin(false);
-    setSolution([]);
-    setCurrentStep(0);
-    setHistory([]);
+    setTargets(nextTargets);
+    setInitialBoard(newBoard.map((currentRow) => [...currentRow]));
+    setInitialTargets(nextTargets.map((target) => [...target]));
+    resetRunState();
   };
 
   const clearBoard = () => {
     setBoard(createBoard(size));
+    setInitialBoard(createBoard(size));
     setTargets([]);
-    setWin(false);
+    setInitialTargets([]);
     setMoves(0);
-    setSolution([]);
-    setCurrentStep(0);
-    setHistory([]);
+    resetRunState();
   };
 
-  const checkVictory = (currentBoard) => {
-    const boxes = [];
-
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        if (currentBoard[r][c] === TOOLS.BOX) {
-          boxes.push([r, c]);
-        }
-      }
-    }
-
-    if (boxes.length === 0 || targets.length === 0) return;
-
-    const solved = boxes.every(([boxR, boxC]) =>
-      targets.some(([targetR, targetC]) => boxR === targetR && boxC === targetC)
-    );
-
-    if (solved) {
-      setWin(true);
-      setHistory((prev) => [...prev, "🎉 Nivel completado"]);
-    }
+  const resetGame = () => {
+    setBoard(initialBoard.map((currentRow) => [...currentRow]));
+    setTargets(initialTargets.map((target) => [...target]));
+    setMoves(0);
+    resetRunState();
   };
 
-  const movePlayer = (dr, dc) => {
-    const newBoard = board.map((r) => [...r]);
+  const checkVictory = useCallback(
+    (currentBoard) => {
+      const boxes = [];
 
-    let playerRow = -1;
-    let playerCol = -1;
-
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        if (newBoard[r][c] === TOOLS.PLAYER) {
-          playerRow = r;
-          playerCol = c;
+      for (let r = 0; r < size; r += 1) {
+        for (let c = 0; c < size; c += 1) {
+          if (currentBoard[r][c] === TOOLS.BOX) {
+            boxes.push([r, c]);
+          }
         }
       }
-    }
 
-    if (playerRow === -1) return false;
+      if (boxes.length === 0 || targets.length === 0) return;
 
-    const nextRow = playerRow + dr;
-    const nextCol = playerCol + dc;
+      const solved = boxes.every(([boxR, boxC]) =>
+        targets.some(([targetR, targetC]) => boxR === targetR && boxC === targetC),
+      );
 
-    if (nextRow < 0 || nextRow >= size || nextCol < 0 || nextCol >= size) {
-      return false;
-    }
+      if (solved) {
+        setWin(true);
+        setHistory((current) => [...current, "Nivel completado"]);
+      }
+    },
+    [size, targets],
+  );
 
-    const nextCell = newBoard[nextRow][nextCol];
+  const movePlayer = useCallback(
+    (dr, dc) => {
+      const newBoard = board.map((currentRow) => [...currentRow]);
+      let playerRow = -1;
+      let playerCol = -1;
 
-    if (nextCell === TOOLS.WALL) return false;
+      for (let r = 0; r < size; r += 1) {
+        for (let c = 0; c < size; c += 1) {
+          if (newBoard[r][c] === TOOLS.PLAYER) {
+            playerRow = r;
+            playerCol = c;
+          }
+        }
+      }
 
-    if (nextCell === TOOLS.BOX) {
-      const boxNextRow = nextRow + dr;
-      const boxNextCol = nextCol + dc;
+      if (playerRow === -1) return false;
 
-      if (
-        boxNextRow < 0 ||
-        boxNextRow >= size ||
-        boxNextCol < 0 ||
-        boxNextCol >= size
-      ) {
+      const nextRow = playerRow + dr;
+      const nextCol = playerCol + dc;
+
+      if (nextRow < 0 || nextRow >= size || nextCol < 0 || nextCol >= size) {
         return false;
       }
 
-      const boxNextCell = newBoard[boxNextRow][boxNextCol];
+      const nextCell = newBoard[nextRow][nextCol];
 
-      if (boxNextCell === TOOLS.WALL || boxNextCell === TOOLS.BOX) {
-        return false;
+      if (nextCell === TOOLS.WALL) return false;
+
+      if (nextCell === TOOLS.BOX) {
+        const boxNextRow = nextRow + dr;
+        const boxNextCol = nextCol + dc;
+
+        if (
+          boxNextRow < 0 ||
+          boxNextRow >= size ||
+          boxNextCol < 0 ||
+          boxNextCol >= size
+        ) {
+          return false;
+        }
+
+        const boxNextCell = newBoard[boxNextRow][boxNextCol];
+
+        if (boxNextCell === TOOLS.WALL || boxNextCell === TOOLS.BOX) {
+          return false;
+        }
+
+        newBoard[boxNextRow][boxNextCol] = TOOLS.BOX;
+        newBoard[nextRow][nextCol] = TOOLS.PLAYER;
+        newBoard[playerRow][playerCol] = TOOLS.FLOOR;
+      } else {
+        newBoard[playerRow][playerCol] = TOOLS.FLOOR;
+        newBoard[nextRow][nextCol] = TOOLS.PLAYER;
       }
-
-      newBoard[boxNextRow][boxNextCol] = TOOLS.BOX;
-      newBoard[nextRow][nextCol] = TOOLS.PLAYER;
-      newBoard[playerRow][playerCol] = TOOLS.FLOOR;
 
       setBoard(newBoard);
       checkVictory(newBoard);
-      setMoves((prev) => prev + 1);
+      setMoves((current) => current + 1);
       return true;
-    }
-
-    newBoard[playerRow][playerCol] = TOOLS.FLOOR;
-    newBoard[nextRow][nextCol] = TOOLS.PLAYER;
-
-    setBoard(newBoard);
-    checkVictory(newBoard);
-    setMoves((prev) => prev + 1);
-    return true;
-  };
+    },
+    [board, checkVictory, size],
+  );
 
   const runAI = async () => {
-    if (mode !== "ia") return;
+    if (mode === "manual") return;
 
     try {
-      setHistory(["Buscando solución con A*..."]);
+      setHistory([`Buscando solucion con ${ALGORITHMS[mode]}...`]);
       setSolution([]);
       setCurrentStep(0);
 
-      const response = await fetch(
-  "https://backend-production-c5264.up.railway.app/sokoban",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      board,
-    }),
-  }
-);
+      const response = await fetch(`${API_BASE_URL}/sokoban`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          board: board.map((row, rowIndex) =>
+            row.map((cell, colIndex) => {
+              const isTarget = targets.some(([targetR, targetC]) => {
+                return targetR === rowIndex && targetC === colIndex;
+              });
+              return isTarget && cell === TOOLS.FLOOR ? TOOLS.TARGET : cell;
+            }),
+          ),
+          algorithm: mode,
+        }),
+      });
 
       const data = await response.json();
 
@@ -193,7 +235,7 @@ export default function Sokoban() {
 
       if (!data.solution || data.solution.length === 0) {
         setHistory([
-          "No se encontró solución.",
+          "No se encontro solucion.",
           `Nodos visitados: ${data.visited ?? 0}`,
         ]);
         return;
@@ -201,56 +243,52 @@ export default function Sokoban() {
 
       setSolution(data.solution);
       setHistory([
-        `Solución encontrada: ${data.solution.length} movimientos`,
+        `Solucion encontrada con ${ALGORITHMS[mode]}: ${data.solution.length} movimientos`,
         `Nodos visitados: ${data.visited}`,
         `Costo: ${data.cost}`,
       ]);
     } catch (error) {
-      alert("Error al conectar con el backend de Sokoban");
+      alert(`Error al conectar con el backend de Sokoban: ${error.message}`);
     }
   };
 
   const nextAIStep = () => {
-    if (mode !== "ia") return;
+    if (mode === "manual") return;
     if (currentStep >= solution.length) return;
 
     const move = solution[currentStep];
-    let moved = false;
-
-    if (move === "UP") moved = movePlayer(-1, 0);
-    if (move === "DOWN") moved = movePlayer(1, 0);
-    if (move === "LEFT") moved = movePlayer(0, -1);
-    if (move === "RIGHT") moved = movePlayer(0, 1);
+    const direction = DIRECTIONS[move];
+    const moved = direction ? movePlayer(direction[0], direction[1]) : false;
 
     if (moved) {
-      setHistory((prev) => [...prev, `Paso ${currentStep + 1}: ${move}`]);
-      setCurrentStep((prev) => prev + 1);
+      setHistory((current) => [...current, `Paso ${currentStep + 1}: ${move}`]);
+      setCurrentStep((current) => current + 1);
     }
   };
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (event) => {
       if (mode !== "manual") return;
 
-      if (e.key === "ArrowUp") movePlayer(-1, 0);
-      if (e.key === "ArrowDown") movePlayer(1, 0);
-      if (e.key === "ArrowLeft") movePlayer(0, -1);
-      if (e.key === "ArrowRight") movePlayer(0, 1);
+      if (event.key === "ArrowUp") movePlayer(-1, 0);
+      if (event.key === "ArrowDown") movePlayer(1, 0);
+      if (event.key === "ArrowLeft") movePlayer(0, -1);
+      if (event.key === "ArrowRight") movePlayer(0, 1);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [board, mode, targets]);
+  }, [mode, movePlayer]);
 
   return (
     <Layout>
       <div style={{ padding: "30px" }}>
-        <h1>📦 Sokoban</h1>
+        <h1>Sokoban</h1>
 
-        {win && <div style={winStyle}>🎉 ¡Nivel completado!</div>}
+        {win && <div style={winStyle}>Nivel completado</div>}
 
         <p style={{ color: "#666" }}>
-          Crea tu nivel, juega manualmente o deja que la IA lo resuelva con A*.
+          Crea tu nivel, juega manualmente o deja que la IA lo resuelva con A* o GBFS.
         </p>
 
         <div style={{ display: "flex", gap: "30px", marginTop: "20px" }}>
@@ -268,19 +306,20 @@ export default function Sokoban() {
               {board.map((row, rowIndex) =>
                 row.map((cell, colIndex) => {
                   const isTarget = targets.some(
-                    ([r, c]) => r === rowIndex && c === colIndex
+                    ([targetR, targetC]) => targetR === rowIndex && targetC === colIndex,
                   );
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={`${rowIndex}-${colIndex}`}
                       onClick={() => editCell(rowIndex, colIndex)}
                       style={getCellStyle(cell, isTarget)}
                     >
                       {getCellIcon(cell, isTarget)}
-                    </div>
+                    </button>
                   );
-                })
+                }),
               )}
             </div>
 
@@ -289,40 +328,38 @@ export default function Sokoban() {
             </p>
 
             <p style={{ color: "#666" }}>
-              En modo manual usa las flechas ↑ ↓ ← → para mover al jugador.
+              En modo manual usa las flechas para mover al jugador.
             </p>
           </div>
 
           <div style={{ ...cardStyle, width: "330px" }}>
-            <h2>Configuración</h2>
+            <h2>Configuracion</h2>
 
             <p>Modo</p>
             <select
               value={mode}
-              onChange={(e) => setMode(e.target.value)}
+              onChange={(e) => {
+                setMode(e.target.value);
+                resetRunState();
+              }}
               style={selectStyle}
             >
-              <option value="manual">Jugar manualmente</option>
-              <option value="ia">Resolver con IA</option>
+              {Object.entries(GAME_MODES).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
             </select>
 
-            <p style={{ marginTop: "18px" }}>Tamaño del grid</p>
-            <select
-              value={size}
-              onChange={(e) => changeSize(e.target.value)}
-              style={selectStyle}
-            >
+            <p style={{ marginTop: "18px" }}>Tamano del grid</p>
+            <select value={size} onChange={(e) => changeSize(e.target.value)} style={selectStyle}>
               <option value="5">5x5</option>
               <option value="6">6x6</option>
               <option value="8">8x8</option>
             </select>
 
             <p style={{ marginTop: "18px" }}>Herramienta</p>
-            <select
-              value={tool}
-              onChange={(e) => setTool(e.target.value)}
-              style={selectStyle}
-            >
+            <select value={tool} onChange={(e) => setTool(e.target.value)} style={selectStyle}>
               <option value=".">Piso</option>
               <option value="#">Pared</option>
               <option value="P">Jugador</option>
@@ -330,18 +367,19 @@ export default function Sokoban() {
               <option value="T">Objetivo</option>
             </select>
 
-            <p style={{ marginTop: "18px" }}>Algoritmo</p>
-            <div style={inputBox}>A*</div>
-
-            <button style={buttonStyle} onClick={mode === "ia" ? runAI : undefined}>
+            <button type="button" style={buttonStyle} onClick={mode === "manual" ? undefined : runAI}>
               {mode === "manual" ? "Iniciar juego" : "Ejecutar IA"}
             </button>
 
-            <button style={buttonStyle} onClick={nextAIStep}>
+            <button type="button" style={buttonStyle} onClick={nextAIStep}>
               Paso siguiente
             </button>
 
-            <button style={buttonStyle} onClick={clearBoard}>
+            <button type="button" style={buttonStyle} onClick={resetGame}>
+              Reiniciar juego
+            </button>
+
+            <button type="button" style={buttonStyle} onClick={clearBoard}>
               Limpiar tablero
             </button>
           </div>
@@ -349,19 +387,21 @@ export default function Sokoban() {
 
         <div style={{ display: "flex", gap: "20px", marginTop: "25px" }}>
           <div style={panelStyle}>
-            <h2>Estadísticas</h2>
-            <p>Modo: {mode === "manual" ? "Manual" : "IA"}</p>
-            <p>Algoritmo: A*</p>
-            <p>Cajas: {board.flat().filter((c) => c === "B").length}</p>
+            <h2>Estadisticas</h2>
+            <p>Modo: {GAME_MODES[mode]}</p>
+            <p>Algoritmo: {mode === "manual" ? "N/A" : ALGORITHMS[mode]}</p>
+            <p>Cajas: {board.flat().filter((cell) => cell === TOOLS.BOX).length}</p>
             <p>Objetivos: {targets.length}</p>
             <p>Movimientos: {moves}</p>
-            <p>Pasos IA: {currentStep}/{solution.length}</p>
+            <p>
+              Pasos IA: {currentStep}/{solution.length}
+            </p>
           </div>
 
           <div style={panelStyle}>
             <h2>Historial</h2>
             {history.length === 0 ? (
-              <p>Esperando acción...</p>
+              <p>Esperando accion...</p>
             ) : (
               <ul>
                 {history.map((item, index) => (
@@ -377,11 +417,11 @@ export default function Sokoban() {
 }
 
 function getCellIcon(cell, isTarget) {
-  if (cell === "#") return "🧱";
-  if (cell === "P") return "🧍";
-  if (cell === "B" && isTarget) return "✅📦";
-  if (cell === "B") return "📦";
-  if (isTarget) return "🎯";
+  if (cell === TOOLS.WALL) return "#";
+  if (cell === TOOLS.PLAYER) return "P";
+  if (cell === TOOLS.BOX && isTarget) return "B/T";
+  if (cell === TOOLS.BOX) return "B";
+  if (isTarget) return "T";
   return "";
 }
 
@@ -389,19 +429,22 @@ function getCellStyle(cell, isTarget) {
   let background = "#e0f2fe";
 
   if (isTarget) background = "#22c55e";
-  if (cell === "#") background = "#1f2937";
-  if (cell === "P") background = "#f59e0b";
-  if (cell === "B") background = isTarget ? "#16a34a" : "#a16207";
+  if (cell === TOOLS.WALL) background = "#1f2937";
+  if (cell === TOOLS.PLAYER) background = "#f59e0b";
+  if (cell === TOOLS.BOX) background = isTarget ? "#16a34a" : "#a16207";
 
   return {
     width: "65px",
     height: "65px",
     background,
+    border: 0,
     borderRadius: "10px",
+    color: cell === TOOLS.WALL ? "white" : "#111827",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    fontSize: "26px",
+    fontSize: "18px",
+    fontWeight: 700,
     cursor: "pointer",
     transition: "0.2s",
   };
@@ -435,14 +478,6 @@ const panelStyle = {
 const selectStyle = {
   width: "100%",
   padding: "10px",
-  marginTop: "5px",
-};
-
-const inputBox = {
-  width: "100%",
-  padding: "10px",
-  background: "#f3f4f6",
-  borderRadius: "8px",
   marginTop: "5px",
 };
 

@@ -9,7 +9,7 @@ from algorithms.sokoban_common import (
 )
 
 
-def solve_sokoban_astar(board):
+def solve_sokoban_gbfs(board):
     rows, cols, player, boxes, targets = parse_sokoban_board(board)
     start_state = (player, boxes)
     open_list = []
@@ -65,8 +65,7 @@ def solve_sokoban_astar(board):
 
             new_cost = cost + 1
             new_path = path + [action]
-            heuristic = sokoban_heuristic(new_state[1], targets)
-            priority = new_cost + heuristic
+            priority = sokoban_heuristic(new_state[1], targets)
 
             heappush(open_list, (priority, new_cost, new_state, new_path))
 

@@ -1,12 +1,4 @@
-// src/components/SokobanStats.jsx
-
-import React from "react";
-
-function SokobanStats({
-  moves,
-  solved,
-  mode,
-}) {
+function SokobanStats({ moves, solved, mode }) {
   return (
     <div
       style={{
@@ -16,23 +8,18 @@ function SokobanStats({
         borderRadius: "8px",
       }}
     >
-      <h3>Estadísticas</h3>
+      <h3>Estadisticas</h3>
 
       <p>
-        <strong>Movimientos:</strong>{" "}
-        {moves}
+        <strong>Movimientos:</strong> {moves}
       </p>
 
       <p>
-        <strong>Modo:</strong>{" "}
-        {mode}
+        <strong>Modo:</strong> {mode}
       </p>
 
       <p>
-        <strong>Estado:</strong>{" "}
-        {solved
-          ? "🎉 Completado"
-          : "⏳ En progreso"}
+        <strong>Estado:</strong> {solved ? "Completado" : "En progreso"}
       </p>
     </div>
   );
