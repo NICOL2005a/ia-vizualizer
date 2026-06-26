@@ -2,43 +2,59 @@
 
 Proyecto desarrollado para la materia de **Fundamentos de Inteligencia Artificial**.
 
-## Descripción
+## Descripcion
 
-IA Visualizer es una aplicación web interactiva que permite visualizar y experimentar con diferentes algoritmos clásicos de Inteligencia Artificial mediante simulaciones gráficas.
+IA Visualizer es una aplicacion web interactiva que permite visualizar y experimentar con diferentes algoritmos clasicos de Inteligencia Artificial mediante simulaciones graficas.
 
-El sistema integra múltiples problemas y técnicas estudiadas en clase dentro de una sola interfaz accesible desde cualquier navegador.
+El sistema integra multiples problemas y tecnicas estudiadas en clase dentro de una sola interfaz accesible desde cualquier navegador.
 
-## Características
+## Caracteristicas
 
 * Interfaz web desarrollada con React y Vite.
 * Backend desarrollado con FastAPI.
 * Despliegue en la nube mediante Railway.
-* Visualización paso a paso de algoritmos.
+* Visualizacion paso a paso de algoritmos.
 * Arquitectura Frontend + Backend desacoplada.
+* Modulos interactivos con edicion de escenarios y estadisticas de ejecucion.
 
-## Módulos Implementados
+## Modulos Implementados
 
 ### Frozen Lake
 
-Implementación del algoritmo de búsqueda **Breadth-First Search (BFS)** para encontrar caminos en un entorno tipo Frozen Lake.
+Implementacion de algoritmos de busqueda para encontrar caminos en un entorno tipo Frozen Lake.
+
+Algoritmos disponibles:
+
+* **Breadth-First Search (BFS)**.
+* **Depth-First Search (DFS)**.
 
 Funciones:
 
-* Configuración del mapa.
-* Visualización de nodos visitados.
-* Visualización del camino solución.
-* Estadísticas de ejecución.
+* Configuracion del mapa.
+* Seleccion del algoritmo de busqueda.
+* Visualizacion de nodos visitados.
+* Visualizacion del camino solucion.
+* Estadisticas de ejecucion.
 
 ### Sokoban
 
-Implementación del algoritmo **A*** para resolver niveles del juego Sokoban.
+Implementacion de algoritmos de busqueda informada para resolver niveles del juego Sokoban.
+
+Algoritmos y modos disponibles:
+
+* Juego manual.
+* **A\***.
+* **Greedy Best-First Search (GBFS)**.
 
 Funciones:
 
 * Editor de niveles.
-* Resolución automática mediante IA.
-* Visualización del proceso de búsqueda.
-* Estadísticas e historial.
+* Seleccion entre modo manual, A* y GBFS.
+* Resolucion automatica mediante IA.
+* Ejecucion paso a paso de la solucion encontrada.
+* Boton para reiniciar el juego sin borrar el nivel creado.
+* Limpieza completa del tablero.
+* Estadisticas e historial.
 
 ### Tic-Tac-Toe
 
@@ -47,20 +63,29 @@ Juego de Gato contra una IA basada en el algoritmo **Minimax**.
 Funciones:
 
 * Juego jugador vs IA.
-* Decisiones óptimas de la computadora.
-* Detección de victoria, derrota y empate.
+* Decisiones optimas de la computadora.
+* Deteccion de victoria, derrota y empate.
 
-### Problema de las 8 Reinas
+### Problema de las N Reinas
 
-Visualización de una solución para el clásico problema de las 8 Reinas.
+Visualizacion interactiva para el problema de las N Reinas, incluyendo configuracion del tablero y ejecucion paso a paso.
+
+Algoritmos disponibles:
+
+* **Escalada simple**.
+* **Maxima pendiente**.
+* **Simulated Annealing**.
 
 Funciones:
 
-* Generación automática de solución.
-* Representación gráfica del tablero.
-* Validación de posiciones seguras.
+* Configuracion del tamano del tablero.
+* Edicion manual de la posicion de las reinas.
+* Generacion aleatoria del tablero.
+* Visualizacion de conflictos.
+* Visualizacion paso a paso de movimientos.
+* Validacion de configuraciones solucion.
 
-## Tecnologías Utilizadas
+## Tecnologias Utilizadas
 
 ### Frontend
 
@@ -84,24 +109,30 @@ Funciones:
 
 ```text
 ia-vizualizer/
-│
-├── backend/
-│   ├── algorithms/
-│   ├── main.py
-│   ├── tictactoe_routes.py
-│   └── 8_reinas_FIA.py
-│
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── styles/
-│
-├── public/
-├── package.json
-└── README.md
+|
+|-- backend/
+|   |-- algorithms/
+|   |   |-- astar_sokoban.py
+|   |   |-- bfs.py
+|   |   |-- dfs.py
+|   |   |-- gbfs_sokoban.py
+|   |   |-- sokoban_common.py
+|   |   `-- 8_queens.py
+|   |-- main.py
+|   |-- tictactoe_routes.py
+|   `-- 8_reinas_FIA.py
+|
+|-- src/
+|   |-- components/
+|   |-- pages/
+|   `-- styles/
+|
+|-- public/
+|-- package.json
+`-- README.md
 ```
 
-## Instalación Local
+## Instalacion Local
 
 ### Frontend
 
@@ -114,10 +145,15 @@ npm run dev
 
 ```bash
 cd backend
-
 pip install -r requirements.txt
-
 uvicorn main:app --reload
+```
+
+## Verificacion
+
+```bash
+npm run lint
+npm run build
 ```
 
 ## Enlace del Proyecto
@@ -132,9 +168,8 @@ https://github.com/NICOL2005a/ia-vizualizer
 
 ## Autores
 
-Cano Nuño Marco Vinicio
-López Reyes Claudia Nicol
+Cano Nuno Marco Vinicio  
+Lopez Reyes Claudia Nicol  
 Rodriguez Velazquez Victor Martin
 
-Proyecto desarrollado como práctica académica para la materia de Fundamentos de Inteligencia Artificial.
-
+Proyecto desarrollado como practica academica para la materia de Fundamentos de Inteligencia Artificial.
