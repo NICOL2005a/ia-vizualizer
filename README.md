@@ -172,4 +172,4 @@ Cano Nuno Marco Vinicio
 Lopez Reyes Claudia Nicol  
 Rodriguez Velazquez Victor Martin
 
-Proyecto desarrollado como practica academica para la materia de Fundamentos de Inteligencia Artificial.
+Proyecto desarrollado como practica final para la materia de Fundamentos de Inteligencia Artificial.
